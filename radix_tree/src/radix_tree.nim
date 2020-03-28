@@ -57,7 +57,7 @@ proc insertNode*(root: Node, node: Node) =
     length = value.len
   if length == 0:
     return
-  let origin = root.children[toNum(value[0])]
+  var origin = root.children[toNum(value[0])]
   if origin.isNil:
     root.children[toNum(value[0])] = node
   else:
@@ -66,34 +66,71 @@ proc insertNode*(root: Node, node: Node) =
       L1 = length
       L2 = origin.value.len
     if idx == L1 and idx == L2:
-      discard
+      origin.hasValue = true
     elif idx < L1 and idx < L2:
       if not origin.isLeaf:
         var node = newNode(origin.value[idx .. ^1])
         node.children = move origin.children
         origin.children = newSeq[Node](SIZE)
         insertNode(origin, node)
-        insert(origin, value[idx .. ^ 1])
+        insert(origin, value[idx .. ^1])
         origin.value = origin.value[0 ..< idx]
         origin.isLeaf = false
+        origin.hasValue = false
       else:
         insert(origin, value[idx .. ^1])
         insert(origin, origin.value[idx .. ^1])
         origin.value = origin.value[0 ..< idx]
         origin.isLeaf = false
+        origin.hasValue = false
     elif idx < L1:
       insert(origin, value[idx .. ^1])
-      origin.isLeaf = false
+      if origin.isLeaf:
+        origin.hasValue = true
+        origin.isLeaf = false
     elif idx < L2:
       insert(origin, origin.value[idx .. ^1])
       origin.value = origin.value[0 ..< idx]
-      origin.isLeaf = false
+      if origin.isLeaf:
+        origin.hasValue = true
+        origin.isLeaf = false
+
+  if not origin.isNil:
+    echo origin.value
+    echo origin.hasValue
+    echo origin.isLeaf
 
 proc insert*(root: Node, value: string) =
   root.insertNode(newNode(value))
 
+proc search(root: Node, value: string): bool =
+  let length = value.len
+  let origin = root.children[toNum(value[0])]
+  if origin == nil:
+    return false
+  else:
+    var i = 1
+    let n = min(length, origin.value.len)
+    while i < n:
+      if origin.value[i] == value[i]:
+        inc(i)
+      else:
+        return false
+    # py
+    # python
+    if i < origin.value.len:
+      return false
+    elif i < length:
+      return search(origin, value[i .. ^1])
+    if not origin.hasValue:
+      return false
+    return true
+
 
 when isMainModule:
+  import unittest
+
+
   var root = newNode("")
   root.insert("python")
   root.insert("pyth")
@@ -102,4 +139,16 @@ when isMainModule:
   root.insert("pyera")
   root.insert("io")
   root.insert("iopen")
+
+  suite "Test Radix Tree":
+    test "search":
+      check root.search("io")
+      check root.search("iopen")
+      check not root.search("py")
+      check root.search("pyerl")
+      check root.search("pyern")
+      check root.search("pyth")
+      check root.search("python")
+      check not root.search("pythonic")
+  echo root.search("iopen")
   echo root
