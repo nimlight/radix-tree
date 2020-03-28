@@ -96,14 +96,14 @@ proc insertNode*(root: Node, node: Node) =
         origin.isLeaf = false
 
   if not origin.isNil:
-    echo origin.value
-    echo origin.hasValue
-    echo origin.isLeaf
+    echo "value: ", origin.value
+    echo "hasValue: ", origin.hasValue
+    echo "isLeaf: ", origin.isLeaf
 
 proc insert*(root: Node, value: string) =
   root.insertNode(newNode(value))
 
-proc search(root: Node, value: string): bool =
+proc search*(root: Node, value: string): bool =
   let length = value.len
   let origin = root.children[toNum(value[0])]
   if origin == nil:
@@ -133,22 +133,30 @@ when isMainModule:
 
   var root = newNode("")
   root.insert("python")
+  root.insert("pyiju")
   root.insert("pyth")
   root.insert("pyerl")
   root.insert("pyern")
+  root.insert("python")
+  root.insert("pyth")
+  root.insert("pyerl")
   root.insert("pyera")
   root.insert("io")
+  root.insert("ioo")
   root.insert("iopen")
 
   suite "Test Radix Tree":
     test "search":
       check root.search("io")
+      check root.search("ioo")
       check root.search("iopen")
       check not root.search("py")
       check root.search("pyerl")
       check root.search("pyern")
       check root.search("pyth")
       check root.search("python")
+      check root.search("pyiju")
+      check not root.search("pyer")
       check not root.search("pythonic")
   echo root.search("iopen")
   echo root
