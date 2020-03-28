@@ -1,5 +1,8 @@
 import strutils, tables
 
+## 
+## Radix Tree Module
+## 
 
 const
   treeTable = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6,
@@ -18,10 +21,12 @@ type
 
 
 proc newNode*(value: string, isLeaf = true, hasValue = true): Node =
+  ## Create new Node.
   Node(value: value, children: newSeq[Node](SIZE), isLeaf: isLeaf,
       hasValue: hasValue)
 
 proc toString(root: Node, level: int): string =
+  ## Convert Node to string.
   var level = level
   if root.value.len != 0:
     result.add indent(root.value, level) & "\n"
@@ -31,15 +36,14 @@ proc toString(root: Node, level: int): string =
       result.add toString(child, level)
 
 proc `$`*(root: Node): string =
+  ## Convert Node to string.
   result = toString(root, 0)
 
 proc toNum(s: char): int =
   treeTable[s]
 
 proc longestPrefix*(s1, s2: string): int =
-  # prologue
-  # prol
-  # 4
+  ## Longgest prefix of two strings
   let length = min(s1.len, s2.len)
   var idx = 0
   while idx < length:
@@ -49,6 +53,7 @@ proc longestPrefix*(s1, s2: string): int =
   result = idx
 
 proc insertNode*(root: Node, node: Node) =
+  ## Insert Node
   let
     value = node.value
     length = value.len
@@ -63,34 +68,41 @@ proc insertNode*(root: Node, node: Node) =
       L1 = length
       L2 = origin.value.len
     if idx == L1 and idx == L2:
+      # match all
       origin.hasValue = true
     elif idx < L1 and idx < L2:
+      # insert -> prologue 
+      # origin -> proper
       if not origin.isLeaf:
-        var node = newNode(origin.value[idx .. ^1])
+        var node = newNode(origin.value[idx .. ^1], hasValue = origin.hasValue)
         node.children = move origin.children
         origin.children = newSeq[Node](SIZE)
         insertNode(origin, node)
-        insertNode(origin, newNode(value[idx .. ^1]))
+        insertNode(origin, newNode(value[idx .. ^1], hasValue = true))
         origin.value = origin.value[0 ..< idx]
         origin.isLeaf = false
         origin.hasValue = false
       else:
-        insertNode(origin, newNode(value[idx .. ^1]))
-        insertNode(origin, newNode(origin.value[idx .. ^1]))
+        # leaf node
+        insertNode(origin, newNode(value[idx .. ^1], hasValue = origin.hasValue))
+        insertNode(origin, newNode(origin.value[idx .. ^1], hasValue = true))
         origin.value = origin.value[0 ..< idx]
         origin.isLeaf = false
         origin.hasValue = false
     elif idx < L1:
-      insertNode(origin, newNode(value[idx .. ^1]))
-      if origin.isLeaf:
-        origin.hasValue = true
-        origin.isLeaf = false
+      # insert -> prologue 
+      # origin -> pro
+      insertNode(origin, newNode(value[idx .. ^1], hasValue = true))
+      # if origin.isLeaf:
+      #   origin.hasValue = true
+      origin.isLeaf = false
     elif idx < L2:
-      insertNode(origin, newNode(origin.value[idx .. ^1]))
+      # insert -> pro
+      # origin -> prologue
+      insertNode(origin, newNode(origin.value[idx .. ^1], hasValue = origin.hasValue))
       origin.value = origin.value[0 ..< idx]
-      if origin.isLeaf:
-        origin.hasValue = true
-        origin.isLeaf = false
+      origin.hasValue = true
+      origin.isLeaf = false
 
   # if not origin.isNil:
   #   echo "value: ", origin.value
@@ -98,17 +110,17 @@ proc insertNode*(root: Node, node: Node) =
   #   echo "isLeaf: ", origin.isLeaf
 
 proc insert*(root: Node, value: string) =
+  ## Insert value.
   root.insertNode(newNode(value))
 
 proc search*(root: Node, value: string): bool =
+  ## Search value.
   let length = value.len
   let origin = root.children[toNum(value[0])]
   if origin == nil:
     return false
   else:
     let idx = longestPrefix(origin.value, value)
-    # py
-    # python
     if idx < origin.value.len:
       return false
     elif idx < length:
@@ -122,9 +134,6 @@ when isMainModule:
   import unittest
  
   var root = newNode("")
-  for i in {'a' .. 'z'}:
-    for j in 1 .. 100:
-      root.insert(repeat(i, j))
   root.insert("python")
   root.insert("pyiju")
   root.insert("pyth")
@@ -153,4 +162,4 @@ when isMainModule:
       check not root.search("pyer")
       check not root.search("pythonic")
   echo root.search("iopen")
-  # echo root
+  echo root
