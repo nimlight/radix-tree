@@ -17,9 +17,6 @@ type
   Node* = ref NodeObj
 
 
-proc insert*(root: Node, value: string)
-
-
 proc newNode*(value: string, isLeaf = true, hasValue = true): Node =
   Node(value: value, children: newSeq[Node](SIZE), isLeaf: isLeaf,
       hasValue: hasValue)
@@ -73,23 +70,23 @@ proc insertNode*(root: Node, node: Node) =
         node.children = move origin.children
         origin.children = newSeq[Node](SIZE)
         insertNode(origin, node)
-        insert(origin, value[idx .. ^1])
+        insertNode(origin, newNode(value[idx .. ^1]))
         origin.value = origin.value[0 ..< idx]
         origin.isLeaf = false
         origin.hasValue = false
       else:
-        insert(origin, value[idx .. ^1])
-        insert(origin, origin.value[idx .. ^1])
+        insertNode(origin, newNode(value[idx .. ^1]))
+        insertNode(origin, newNode(origin.value[idx .. ^1]))
         origin.value = origin.value[0 ..< idx]
         origin.isLeaf = false
         origin.hasValue = false
     elif idx < L1:
-      insert(origin, value[idx .. ^1])
+      insertNode(origin, newNode(value[idx .. ^1]))
       if origin.isLeaf:
         origin.hasValue = true
         origin.isLeaf = false
     elif idx < L2:
-      insert(origin, origin.value[idx .. ^1])
+      insertNode(origin, newNode(origin.value[idx .. ^1]))
       origin.value = origin.value[0 ..< idx]
       if origin.isLeaf:
         origin.hasValue = true
