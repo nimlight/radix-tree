@@ -92,10 +92,10 @@ proc insertNode*(root: Node, node: Node) =
         origin.hasValue = true
         origin.isLeaf = false
 
-  if not origin.isNil:
-    echo "value: ", origin.value
-    echo "hasValue: ", origin.hasValue
-    echo "isLeaf: ", origin.isLeaf
+  # if not origin.isNil:
+  #   echo "value: ", origin.value
+  #   echo "hasValue: ", origin.hasValue
+  #   echo "isLeaf: ", origin.isLeaf
 
 proc insert*(root: Node, value: string) =
   root.insertNode(newNode(value))
@@ -106,19 +106,13 @@ proc search*(root: Node, value: string): bool =
   if origin == nil:
     return false
   else:
-    var i = 1
-    let n = min(length, origin.value.len)
-    while i < n:
-      if origin.value[i] == value[i]:
-        inc(i)
-      else:
-        return false
+    let idx = longestPrefix(origin.value, value)
     # py
     # python
-    if i < origin.value.len:
+    if idx < origin.value.len:
       return false
-    elif i < length:
-      return search(origin, value[i .. ^1])
+    elif idx < length:
+      return search(origin, value[idx .. ^1])
     if not origin.hasValue:
       return false
     return true
@@ -126,9 +120,11 @@ proc search*(root: Node, value: string): bool =
 
 when isMainModule:
   import unittest
-
-
+ 
   var root = newNode("")
+  for i in {'a' .. 'z'}:
+    for j in 1 .. 100:
+      root.insert(repeat(i, j))
   root.insert("python")
   root.insert("pyiju")
   root.insert("pyth")
@@ -136,6 +132,7 @@ when isMainModule:
   root.insert("pyern")
   root.insert("python")
   root.insert("pyth")
+  root.insert("")
   root.insert("pyerl")
   root.insert("pyera")
   root.insert("io")
@@ -156,4 +153,4 @@ when isMainModule:
       check not root.search("pyer")
       check not root.search("pythonic")
   echo root.search("iopen")
-  echo root
+  # echo root
