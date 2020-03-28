@@ -16,11 +16,11 @@ type
     value: string
     children: seq[Node]
     isLeaf: bool
-    hasValue: bool
+    hasValue: bool # -> handler
   Node* = ref NodeObj
 
 
-proc newNode*(value: string, isLeaf = true, hasValue = true): Node =
+proc newNode*(value: string, isLeaf = true, hasValue = true): Node {.inline.} =
   ## Create new Node.
   Node(value: value, children: newSeq[Node](SIZE), isLeaf: isLeaf,
       hasValue: hasValue)
@@ -39,10 +39,10 @@ proc `$`*(root: Node): string =
   ## Convert Node to string.
   result = toString(root, 0)
 
-proc toNum(s: char): int =
+proc toNum(s: char): int {.inline.} =
   treeTable[s]
 
-proc longestPrefix*(s1, s2: string): int =
+proc longestPrefix*(s1, s2: string): int {.inline.} =
   ## Longgest prefix of two strings
   let length = min(s1.len, s2.len)
   var idx = 0
@@ -75,8 +75,7 @@ proc insertNode*(root: Node, node: Node) =
       # origin -> proper
       if not origin.isLeaf:
         var node = newNode(origin.value[idx .. ^1], hasValue = origin.hasValue)
-        node.children = move origin.children
-        origin.children = newSeq[Node](SIZE)
+        swap(node.children, origin.children)
         insertNode(origin, node)
         insertNode(origin, newNode(value[idx .. ^1], hasValue = true))
         origin.value = origin.value[0 ..< idx]
@@ -142,6 +141,7 @@ when isMainModule:
   root.insert("python")
   root.insert("pyth")
   root.insert("")
+  root.insert("pok")
   root.insert("pyerl")
   root.insert("pyera")
   root.insert("io")
@@ -161,5 +161,8 @@ when isMainModule:
       check root.search("pyiju")
       check not root.search("pyer")
       check not root.search("pythonic")
+      check root.search("pok")
+      check not root.search("poka")
+      check not root.search("bok")
   echo root.search("iopen")
   echo root
