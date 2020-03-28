@@ -1,4 +1,4 @@
-import ../radix_tree/src/radix_tree
+import ../src/radix_tree
 
 
 import unittest

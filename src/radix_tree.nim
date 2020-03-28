@@ -25,7 +25,7 @@ proc newNode*(value: string, isLeaf = true, hasValue = true): Node {.inline.} =
   Node(value: value, children: newSeq[Node](SIZE), isLeaf: isLeaf,
       hasValue: hasValue)
 
-proc toString(root: Node, level: int): string =
+proc toString(root: Node, level: int): string {.inline.} =
   ## Convert Node to string.
   var level = level
   if root.value.len != 0:
@@ -35,7 +35,7 @@ proc toString(root: Node, level: int): string =
     if not child.isNil:
       result.add toString(child, level)
 
-proc `$`*(root: Node): string =
+proc `$`*(root: Node): string {.inline.} =
   ## Convert Node to string.
   result = toString(root, 0)
 
@@ -78,14 +78,14 @@ proc insertNode*(root: Node, node: Node) =
         swap(node.children, origin.children)
         insertNode(origin, node)
         insertNode(origin, newNode(value[idx .. ^1], hasValue = true))
-        origin.value = origin.value[0 ..< idx]
+        origin.value.setLen(idx)
         origin.isLeaf = false
         origin.hasValue = false
       else:
         # leaf node
         insertNode(origin, newNode(value[idx .. ^1], hasValue = origin.hasValue))
         insertNode(origin, newNode(origin.value[idx .. ^1], hasValue = true))
-        origin.value = origin.value[0 ..< idx]
+        origin.value.setLen(idx)
         origin.isLeaf = false
         origin.hasValue = false
     elif idx < L1:
@@ -99,7 +99,7 @@ proc insertNode*(root: Node, node: Node) =
       # insert -> pro
       # origin -> prologue
       insertNode(origin, newNode(origin.value[idx .. ^1], hasValue = origin.hasValue))
-      origin.value = origin.value[0 ..< idx]
+      origin.value.setLen(idx)
       origin.hasValue = true
       origin.isLeaf = false
 
@@ -108,7 +108,7 @@ proc insertNode*(root: Node, node: Node) =
   #   echo "hasValue: ", origin.hasValue
   #   echo "isLeaf: ", origin.isLeaf
 
-proc insert*(root: Node, value: string) =
+proc insert*(root: Node, value: string) {.inline.} =
   ## Insert value.
   root.insertNode(newNode(value))
 
